@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface PSRepository extends JpaRepository<Game, Integer> {
     Optional<Game> findByNameOfTheGame(String nameOfTheGame);
+    void deleteByNameOfTheGame(String name);
 }

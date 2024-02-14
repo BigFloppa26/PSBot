@@ -2,6 +2,7 @@ package ustin.psbot.services;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,7 +29,7 @@ public class GameService {
     }
 
     @Transactional
-    public boolean saveGame(MultipartFile file, int quantity, String  locations, String  platform, String nameOfTheGame) throws IOException {
+    public boolean saveGame(MultipartFile file, int quantity, String locations, String platform, String nameOfTheGame) throws IOException {
         Game game;
 
         if (file.getSize() != 0) {
@@ -39,7 +40,7 @@ public class GameService {
             return false;
     }
 
-    public Game convertMultipartToGame(MultipartFile file, int quantity, String  locations, String  platform, String nameOfTheGame) throws IOException { // сохраняет фото с метаданными
+    public Game convertMultipartToGame(MultipartFile file, int quantity, String locations, String platform, String nameOfTheGame) throws IOException { // сохраняет фото с метаданными
         String fileName = file.getOriginalFilename();    // получаем оригинальное имя для блока ниже
         String fileExtension = null;
 
@@ -69,15 +70,21 @@ public class GameService {
     public PSGameDTOForSite findOneGameByName(String nameOfTheGame) {
         String name = URLDecoder.decode(nameOfTheGame, StandardCharsets.UTF_8);  // получаем имя игры в декодированном виде
         Optional<Game> optionalGame = psRepository.findByNameOfTheGame(name);    // находим в БД игру
-
         PSGameDTOForSite psGameDTOForSite = null;
-        if (optionalGame.isPresent()) {
-            Game game = optionalGame.get();
-            psGameDTOForSite = mapper.map(game, PSGameDTOForSite.class);         // переводим объект Game из БД в объект ДТО
 
-            Base64.Encoder base64 = Base64.getEncoder();
-            psGameDTOForSite.setImage(base64.encodeToString(optionalGame.get().getBytes()));    // кодируем байты для передачи в ДТО
+        if (optionalGame.isPresent()) {
+            psGameDTOForSite = mapper.map(optionalGame.get(), PSGameDTOForSite.class);
         }
         return psGameDTOForSite;
     }
+
+    @Transactional
+    public HttpStatus deleteGameByName(String name) {
+        if (psRepository.findByNameOfTheGame(name).isPresent()) {
+            psRepository.deleteByNameOfTheGame(name);
+            return HttpStatus.OK;
+        } else
+            return HttpStatus.BAD_REQUEST;
+    }
 }
+

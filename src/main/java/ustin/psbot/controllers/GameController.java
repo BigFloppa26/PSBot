@@ -1,5 +1,8 @@
 package ustin.psbot.controllers;
 
+import org.apache.commons.io.IOUtils;
+import org.springframework.http.CacheControl;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -8,6 +11,8 @@ import ustin.psbot.dto.PSGameDTOForSite;
 import ustin.psbot.services.GameService;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
 
 @RestController
 @RequestMapping("/games")
@@ -24,7 +29,7 @@ public class GameController {
                                       @RequestParam("location") String location,
                                       @RequestParam("platform") String platform,
                                       @RequestParam("nameofthegame") String nameOfTheGame) throws IOException {
-        if(gameService.saveGame(multipartFile, quantity, location, platform, nameOfTheGame)) {
+        if (gameService.saveGame(multipartFile, quantity, location, platform, nameOfTheGame)) {
             return ResponseEntity.status(HttpStatus.OK).body("OK");
         } else
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Save has error");
@@ -39,5 +44,10 @@ public class GameController {
             return ResponseEntity.status(HttpStatus.OK).body(psGameDTOForSite);
         } else
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @DeleteMapping("/{nameofthegame}")
+    public ResponseEntity<?> deleteGame(@PathVariable("nameofthegame") String nameOfTheGame) {
+        return new ResponseEntity<>(gameService.deleteGameByName(nameOfTheGame));
     }
 }

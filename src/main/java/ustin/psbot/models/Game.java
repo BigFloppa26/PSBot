@@ -1,14 +1,14 @@
 package ustin.psbot.models;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity(name = "image")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 public class Game {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,20 +18,21 @@ public class Game {
     @Column(name = "name_of_the_game")
     private String nameOfTheGame;
 
-    @Column(name = "image_content_type")
-    private String contentType;
-
-    @Column(name = "quantity")
-    private int quantity;
-
     @Column(name = "location")
     private String locations;
-
-    private String psPlatforms;
 
     @Lob
     @Column(name = "image")
     private byte[] bytes;
+
+    @Column(name = "quantity")
+    private int quantity;
+
+    @Column(name = "ps_platforms")
+    private String psPlatforms;
+
+    @Column(name = "image_content_type")
+    private String contentType;
 
     @Column(name = "suffix")
     private String suffix;
