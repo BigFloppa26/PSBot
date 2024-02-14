@@ -1,26 +1,31 @@
 package ustin.psbot.controllers;
 
-import org.apache.commons.io.IOUtils;
-import org.springframework.http.CacheControl;
-import org.springframework.http.HttpHeaders;
+import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ustin.psbot.dto.PSGameDTOForSite;
 import ustin.psbot.services.GameService;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
 
 @RestController
 @RequestMapping("/games")
 public class GameController {
     private final GameService gameService;
+    private final ResourceLoader loader;
 
-    public GameController(GameService gameService) {
+    @Autowired
+    public GameController(GameService gameService, ResourceLoader loader) {
         this.gameService = gameService;
+        this.loader = loader;
     }
 
     @PostMapping
@@ -49,5 +54,17 @@ public class GameController {
     @DeleteMapping("/{nameofthegame}")
     public ResponseEntity<?> deleteGame(@PathVariable("nameofthegame") String nameOfTheGame) {
         return new ResponseEntity<>(gameService.deleteGameByName(nameOfTheGame));
+    }
+
+    @SneakyThrows
+    @PostMapping("/saveimage")
+    public ResponseEntity<?> saveImage(@RequestParam("photo") MultipartFile file) {        // сохраняет файл в статик ресурсах
+        String filePath = "D:/SpringBoot/PSBot/src/main/resources/static/" + file.getOriginalFilename();
+        File newFile = new File(filePath);
+
+        try (FileOutputStream fileOutputStream = new FileOutputStream(newFile)) {
+            FileCopyUtils.copy(file.getInputStream(), fileOutputStream);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body("OK");
     }
 }
