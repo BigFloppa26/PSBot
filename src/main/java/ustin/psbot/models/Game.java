@@ -3,7 +3,7 @@ package ustin.psbot.models;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Entity(name = "image")
+@Entity(name = "game")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -12,7 +12,7 @@ import lombok.*;
 public class Game {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "image_id")
+    @Column(name = "id")
     private int id;
 
     @Column(name = "name_of_the_game")
@@ -36,4 +36,10 @@ public class Game {
 
     @Column(name = "suffix")
     private String suffix;
+
+    @Column(name = "style")
+    private String style;
+
+    @Column(name = "file_path")
+    private String filePath;
 }

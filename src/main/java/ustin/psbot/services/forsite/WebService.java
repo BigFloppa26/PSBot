@@ -1,7 +1,9 @@
-package ustin.psbot.services;
+package ustin.psbot.services.forsite;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,34 +15,33 @@ import ustin.psbot.repositories.PSRepository;
 import java.io.*;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
-public class GameService {
+public class WebService {
     private final PSRepository psRepository;
     private final ModelMapper mapper;
 
     @Autowired
-    public GameService(PSRepository psRepository, ModelMapper mapper) {
+    public WebService(PSRepository psRepository, ModelMapper mapper) {
         this.psRepository = psRepository;
         this.mapper = mapper;
     }
 
     @Transactional
-    public boolean saveGame(MultipartFile file, int quantity, String locations, String platform, String nameOfTheGame) throws IOException {
+    public boolean saveGame(MultipartFile file, int quantity, String locations, String platform, String nameOfTheGame, String style, String filePath) throws IOException {
         Game game;
 
         if (file.getSize() != 0) {
-            game = convertMultipartToGame(file, quantity, locations, platform, nameOfTheGame);
+            game = convertMultipartToGame(file, quantity, locations, platform, nameOfTheGame, style, filePath);
             psRepository.save(game);
             return true;
         } else
             return false;
     }
 
-    public Game convertMultipartToGame(MultipartFile file, int quantity, String locations, String platform, String nameOfTheGame) throws IOException { // сохраняет фото с метаданными
+    public Game convertMultipartToGame(MultipartFile file, int quantity, String locations, String platform, String nameOfTheGame, String style, String filePath) throws IOException { // сохраняет фото с метаданными
         String fileName = file.getOriginalFilename();    // получаем оригинальное имя для блока ниже
         String fileExtension = null;
 
@@ -63,6 +64,8 @@ public class GameService {
         game.setLocations(locations);
         game.setPsPlatforms(platform);
         game.setBytes(file.getBytes());
+        game.setStyle(style);
+        game.setFilePath(filePath);
 
         return game;
     }
@@ -85,6 +88,14 @@ public class GameService {
             return HttpStatus.OK;
         } else
             return HttpStatus.BAD_REQUEST;
+    }
+
+    public Page<Game> findAllGames(Pageable pageable) {
+        return psRepository.findAll(pageable);
+    }
+
+    public Game findOneGame(String name) {
+        return psRepository.findGamesByNameOfTheGame(name);
     }
 }
 

@@ -1,70 +1,47 @@
 package ustin.psbot.controllers;
 
-import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.FileCopyUtils;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import ustin.psbot.dto.PSGameDTOForSite;
-import ustin.psbot.services.GameService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import ustin.psbot.models.Game;
+import ustin.psbot.services.forsite.WebService;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
 
-@RestController
-@RequestMapping("/games")
+@Controller
+@RequestMapping("games")
 public class GameController {
-    private final GameService gameService;
-    private final ResourceLoader loader;
+    private final WebService webService;
 
-    @Autowired
-    public GameController(GameService gameService, ResourceLoader loader) {
-        this.gameService = gameService;
-        this.loader = loader;
+    public GameController(WebService webService) {
+        this.webService = webService;
     }
 
-    @PostMapping
-    public ResponseEntity<?> saveGame(@RequestParam("photo") MultipartFile multipartFile,
-                                      @RequestParam("quantity") int quantity,
-                                      @RequestParam("location") String location,
-                                      @RequestParam("platform") String platform,
-                                      @RequestParam("nameofthegame") String nameOfTheGame) throws IOException {
-        if (gameService.saveGame(multipartFile, quantity, location, platform, nameOfTheGame)) {
-            return ResponseEntity.status(HttpStatus.OK).body("OK");
-        } else
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Save has error");
+    @GetMapping
+    public String showAllGames(Model model,
+                               @RequestParam(value = "page", required = false) Optional<Integer> page,
+                               @RequestParam(value = "size", required = false) Optional<Integer> size) {
+        int currentPage = page.orElse(1);
+        int pageSize = size.orElse(3);
+
+        Pageable pageable = PageRequest.of(currentPage, pageSize);
+        Page<Game> gameList = webService.findAllGames(pageable);
+        model.addAttribute("pageList", gameList);
+
+        return "/games/allGames";
     }
 
-    @GetMapping("/{nameofthegame}")
-    @ResponseBody
-    public ResponseEntity<PSGameDTOForSite> showOneGame(@PathVariable("nameofthegame") String nameOfTheGame) {
-        PSGameDTOForSite psGameDTOForSite = gameService.findOneGameByName(nameOfTheGame);
+    @GetMapping("/{id}")
+    public String showOneGame(Model model, @PathVariable("id") String name) {
+        model.addAttribute("game", webService.findOneGame(name));
 
-        if (psGameDTOForSite != null) {
-            return ResponseEntity.status(HttpStatus.OK).body(psGameDTOForSite);
-        } else
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-
-    @DeleteMapping("/{nameofthegame}")
-    public ResponseEntity<?> deleteGame(@PathVariable("nameofthegame") String nameOfTheGame) {
-        return new ResponseEntity<>(gameService.deleteGameByName(nameOfTheGame));
-    }
-
-    @SneakyThrows
-    @PostMapping("/saveimage")
-    public ResponseEntity<?> saveImage(@RequestParam("photo") MultipartFile file) {        // сохраняет файл в статик ресурсах
-        String filePath = "D:/SpringBoot/PSBot/src/main/resources/static/" + file.getOriginalFilename();
-        File newFile = new File(filePath);
-
-        try (FileOutputStream fileOutputStream = new FileOutputStream(newFile)) {
-            FileCopyUtils.copy(file.getInputStream(), fileOutputStream);
-        }
-        return ResponseEntity.status(HttpStatus.OK).body("OK");
+        return "/games/oneGame";
     }
 }

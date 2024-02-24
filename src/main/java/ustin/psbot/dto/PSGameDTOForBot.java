@@ -13,11 +13,5 @@ import org.telegram.telegrambots.meta.api.objects.InputFile;
 public class PSGameDTOForBot {
     @NotEmpty(message = "Pls write name of the games")
     private String nameOfTheGame;
-    private String location;
     private InputFile file;
-    @Min(0)
-    private int quantity;
-    @NotEmpty
-    private String platform;
-
 }

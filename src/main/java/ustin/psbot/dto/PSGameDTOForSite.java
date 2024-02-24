@@ -13,4 +13,5 @@ public class PSGameDTOForSite {
     private byte[] bytes;
     private int quantity;
     private String psPlatforms;
+    private String style;
 }
