@@ -1,5 +1,6 @@
 package ustin.psbot.services.forsite;
 
+import lombok.SneakyThrows;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -10,9 +11,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ustin.psbot.dto.PSGameDTOForSite;
 import ustin.psbot.models.Game;
+import ustin.psbot.models.GameDTO;
 import ustin.psbot.repositories.PSRepository;
 
-import java.io.*;
+
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -96,6 +100,37 @@ public class WebService {
 
     public Game findOneGame(String name) {
         return psRepository.findGamesByNameOfTheGame(name);
+    }
+
+    @SneakyThrows
+    @Transactional
+    public void saveGame(GameDTO dto) {
+        Game game = mapper.map(dto, Game.class);
+
+        String filePath = "D:\\SpringBoot\\PSBot\\src\\main\\resources\\static\\" + dto.getFile().getName();
+        game.setFilePath(filePath);
+
+        try(FileInputStream fis = new FileInputStream(dto.getFile())) {
+            byte[] bytes = fis.readAllBytes();
+            game.setBytes(bytes);
+        }
+
+        game.setContentType("image/jpeg");
+        String fileName = dto.getFile().getName();    // получаем оригинальное имя для блока ниже
+        String fileExtension = null;
+
+
+        if (dto.getFile().canRead()) {
+            if (fileName != null && !fileName.isEmpty()) {                            // Проверка, что у файла есть имя
+                int lastIndex = fileName.lastIndexOf('.');                        // Находим последнюю точку в имени файла
+                if (lastIndex != -1 && lastIndex < fileName.length() - 1) {           // Проверка, что точка есть в имени файла и не является последним символом
+                    fileExtension = fileName.substring(lastIndex + 1);      // Получаем расширение файла
+                }
+            }
+        }
+        game.setSuffix(fileExtension);
+
+        psRepository.save(game);
     }
 }
 

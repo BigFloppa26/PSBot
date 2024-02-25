@@ -6,7 +6,10 @@
 </head>
 <body>
   <div th:each="game : ${pageList}">
-      <span th:text="${game.getNameOfTheGame()} + ${game.getQuantity()}"></span>
+      <a th:href="@{/games/{name}(name=${game.getNameOfTheGame()})}" th:text="${game.getNameOfTheGame()}"></a>
   </div>
+    <div>
+        <a href="/games/addGame">Add new game</a>
+    </div>
 </body>
 </html>

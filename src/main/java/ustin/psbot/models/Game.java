@@ -3,6 +3,8 @@ package ustin.psbot.models;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.net.URI;
+
 @Entity(name = "game")
 @Data
 @NoArgsConstructor
@@ -42,4 +44,9 @@ public class Game {
 
     @Column(name = "file_path")
     private String filePath;
+
+    @SneakyThrows
+    public URI getUri(String nameOfTheGame) {
+        return new URI(nameOfTheGame);
+    }
 }
