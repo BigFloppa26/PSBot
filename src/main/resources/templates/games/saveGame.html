@@ -5,21 +5,38 @@
   <title>Save Game</title>
 </head>
 <body>
- <div th:method="POST" th:action="@{/games/addGame}" th:object="${newGame}">
-     <label for="name">Name of the game:</label>
-     <input type="text" th:field="*{nameOfTheGame}" id="name">
-     <label for="quantity">Quantity:</label>
-     <input type="text" th:field="*{quantity}" id="quantity">
-     <label for="location">Location:</label>
-     <input type="text" th:field="*{locations}" id="location">
-     <label for="platform">Platform:</label>
-     <input type="text" th:field="*{psPlatforms}" id="platform">
-     <label for="style">Style:</label>
-     <input type="text" th:field="*{style}" id="style">
-     <input type="file" th:field="*{file}" accept="image/*">
-
+ <form th:method="POST" th:action="@{/games/add}" th:object="${newGame}" enctype="multipart/form-data">
+      <div>
+          <label for="name">Name of the game:</label>
+          <input type="text" th:field="*{nameOfTheGame}" id="name">
+          <div th:if="${#fields.hasErrors('nameOfTheGame')}" th:errors="*{nameOfTheGame}"></div>
+      </div>
+     <div>
+         <label for="quantity">Quantity:</label>
+         <input type="text" th:field="*{quantity}" id="quantity">
+         <div th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}"></div>
+     </div>
+     <div>
+         <label for="location">Location:</label>
+         <input type="text" th:field="*{locations}" id="location">
+         <div th:if="${#fields.hasErrors('locations')}" th:errors="*{locations}"></div>
+     </div>
+     <div>
+         <label for="platform">Platform:</label>
+         <input type="text" th:field="*{psPlatforms}" id="platform">
+         <div th:if="${#fields.hasErrors('psPlatforms')}" th:errors="*{psPlatforms}"></div>
+     </div>
+     <div>
+         <label for="style">Style:</label>
+         <input type="text" th:field="*{style}" id="style">
+         <div th:if="${#fields.hasErrors('style')}" th:errors="*{style}"></div>
+     </div>
+     <div>
+         <label for="file">File</label>
+         <input type="file" th:field="*{file}" accept="image/*" class="form-control-file" id="file">
+         <div th:if="${#fields.hasErrors('file')}" th:errors="*{file}"></div>
+     </div>
      <input type="submit" value="Save game">
-
- </div>
+ </form>
 </body>
 </html>

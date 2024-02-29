@@ -19,14 +19,12 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class BotService {
     private final PSRepository psRepository;
-    private final ModelMapper mapper;
-    private final PSUtils psUtils;
+
 
     @Autowired
-    public BotService(PSRepository psRepository, ModelMapper mapper, PSUtils psUtils) {
+    public BotService(PSRepository psRepository) {
         this.psRepository = psRepository;
-        this.mapper = mapper;
-        this.psUtils = psUtils;
+
     }
     // в боте видим фото, название,
     public List<PSGameDTOForBot> findGamesByPlatformsLocationAndStyle(String platform, String location, String style) {

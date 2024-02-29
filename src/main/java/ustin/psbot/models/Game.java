@@ -1,9 +1,12 @@
 package ustin.psbot.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.net.URI;
 
 @Entity(name = "game")
 @Data
@@ -11,6 +14,7 @@ import java.net.URI;
 @AllArgsConstructor
 @Getter
 @Setter
+@EqualsAndHashCode
 public class Game {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,35 +22,24 @@ public class Game {
     private int id;
 
     @Column(name = "name_of_the_game")
+    @NotEmpty(message = "Plz write name of the game")
     private String nameOfTheGame;
 
     @Column(name = "location")
+    @NotEmpty(message = "Plz add location")
     private String locations;
 
-    @Lob
-    @Column(name = "image")
-    private byte[] bytes;
-
     @Column(name = "quantity")
+    @Min(0)
     private int quantity;
 
     @Column(name = "ps_platforms")
+    @NotEmpty
     private String psPlatforms;
-
-    @Column(name = "image_content_type")
-    private String contentType;
-
-    @Column(name = "suffix")
-    private String suffix;
 
     @Column(name = "style")
     private String style;
 
     @Column(name = "file_path")
     private String filePath;
-
-    @SneakyThrows
-    public URI getUri(String nameOfTheGame) {
-        return new URI(nameOfTheGame);
-    }
 }
