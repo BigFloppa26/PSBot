@@ -17,4 +17,6 @@ public interface PSRepository extends JpaRepository<Game, Integer> {
     Game findGamesByNameOfTheGame(String name);
 
     List<Game> findGamesByPsPlatformsIgnoreCaseAndLocationsIgnoreCaseAndStyleIgnoreCase(String platforms, String locations, String style);
+
+    void deleteById(int id);
 }

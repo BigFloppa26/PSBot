@@ -42,4 +42,7 @@ public class Game {
 
     @Column(name = "file_path")
     private String filePath;
+
+    @Column(name = "link_to_image")
+    private String link;
 }

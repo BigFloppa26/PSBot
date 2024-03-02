@@ -20,9 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -111,8 +109,8 @@ public class WebService {
     public void saveGame(DTOForSaveAndUpdateGame dto) {
         saveImageFromMultipartFileInStaticFolder(dto.getFile());
         Game game = mapper.map(dto, Game.class);
-        game.setFilePath(getFilePath(dto.getFile()).toString().replace("\\", "/"));
-        System.out.println(game.getFilePath());
+        game.setFilePath(getFilePath(dto.getFile()).toString());
+        game.setLink(createLinkToImage(dto.getFile()));
         psRepository.save(game);
     }
 
@@ -121,27 +119,39 @@ public class WebService {
     public void updateGame(DTOForSaveAndUpdateGame dto, String name) {
         Game game = psRepository.findGamesByNameOfTheGame(name);
 
+        Map<String, String> map = new HashMap<>();
+        map.put("path", game.getFilePath());
+        map.put("link", game.getLink());
+        map.put("id", String.valueOf(game.getId()));
+
         MultipartFile file = dto.getFile();
-        byte[] bytesFromDTO = file.getBytes();
-        byte[] bytesFromDB = readFileAsBytes(game.getFilePath());
-
-        game = mapper.map(dto, Game.class);
-
-        if (!Arrays.equals(bytesFromDTO, bytesFromDB)) {
-            deleteFile(game.getFilePath());
-            saveImage(dto.getFile());
-            game.setFilePath(getFilePath(dto.getFile()).toString());
-        }
-        psRepository.save(game);
+        if (file.getSize() == 0) {
+            game = mapper.map(dto, Game.class);
+            game.setId(Integer.parseInt(map.get("id")));
+            game.setLink(map.get("link"));
+            game.setFilePath(map.get("path"));
+            psRepository.save(game);
+        } else
+            if (file.getSize() != 0) {
+                Path pathOne = Path.of("D:\\SpringBoot\\PSBot\\src\\main\\resources\\static\\");
+                Path filePath = Path.of(game.getFilePath());
+                saveImageFromMultipartFileInStaticFolder(dto.getFile());
+                deleteFile(String.valueOf(pathOne.resolve(filePath)));
+                game = mapper.map(dto, Game.class);
+                game.setLink(createLinkToImage(dto.getFile()));
+                game.setFilePath(getFilePath(dto.getFile()).toString());
+                game.setId(Integer.parseInt(map.get("id")));
+                psRepository.save(game);
+            }
     }
 
     @Transactional
     public void deleteGameByName(String name) {
         Game game = psRepository.findGamesByNameOfTheGame(name);
-        Path path = Path.of("D:\\SpringBoot\\PSBot\\src\\main\\resources\\static");
+        psRepository.deleteById(game.getId());
+        Path path = Path.of("D:\\SpringBoot\\PSBot\\src\\main\\resources\\static\\");
         Path path1 = Path.of(game.getFilePath());
         deleteFile(String.valueOf(path.resolve(path1)));
-        psRepository.deleteByNameOfTheGame(name);
     }
 
     public Path getFilePath(MultipartFile file) {
@@ -167,11 +177,6 @@ public class WebService {
         return Files.readAllBytes(filePath);
     }
 
-    @SneakyThrows
-    public void saveImage(MultipartFile file) {
-        Path path = Paths.get("D:\\SpringBoot\\PSBot\\src\\main\\resources\\static\\images\\", file.getOriginalFilename()); // Создаем путь к файлу
-        Files.write(path, file.getBytes()); // Записываем байты изображения в файл
-    }
 
     @SneakyThrows
     public byte[] readFileAsBytes(String filePath) {
@@ -184,6 +189,9 @@ public class WebService {
             e.printStackTrace();
             return new byte[0]; // Возвращаем пустой массив в случае ошибки
         }
+    }
+    public String createLinkToImage(MultipartFile file) {
+        return  "/images/" + file.getOriginalFilename();
     }
 }
 

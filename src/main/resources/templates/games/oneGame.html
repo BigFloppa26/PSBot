@@ -5,14 +5,23 @@
   <title>Game</title>
 </head>
 <body>
-  <div th:text="${game.getNameOfTheGame()}"></div>
-  <p><img th:src="${game.getFilePath()}"></p>
+  <div th:text="'Name of the game: ' + ${game.getNameOfTheGame()}"></div>
+  <div th:text="'Quantity: ' + ${game.getQuantity()}"></div>
+  <div th:text="'Location: ' + ${game.getLocations()}"></div>
+  <div th:text="'Platform: ' + ${game.getPsPlatforms()}"></div>
+  <div th:text="'Style' + ${game.getStyle()}"></div>
+  <p><img th:src="${game.getLink()}" alt="image"></p>
   <div>
     <a href="/games">Back</a>
+  </div>
+  <div>
     <a th:href="@{/games/{name}/update(name=${game.getNameOfTheGame()})}">Update game</a>
+  </div>
+  <div>
     <form th:method="DELETE" th:action="@{/games/{name}/delete(name=${game.getNameOfTheGame()})}">
       <input type="submit" value="Delete game">
     </form>
   </div>
+
 </body>
 </html>

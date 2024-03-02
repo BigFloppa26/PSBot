@@ -1,6 +1,8 @@
 package ustin.psbot.controllers;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.apache.coyote.Response;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
@@ -13,6 +15,7 @@ import ustin.psbot.dto.DTOToView;
 import ustin.psbot.services.forsite.WebService;
 
 import java.util.Optional;
+import java.util.Random;
 
 @Controller
 @RequestMapping("games")
@@ -60,7 +63,7 @@ public class GameController {
     }
 
     @GetMapping("/{name}/update")
-    public String pageForUpdateGame(@PathVariable("name") String name, Model model) {
+    public String pageForUpdateGame(@PathVariable("name") String name, Model model, HttpServletResponse response) {
         model.addAttribute("updateGame", webService.findOneGameByName(name));
 
         return "/games/update";

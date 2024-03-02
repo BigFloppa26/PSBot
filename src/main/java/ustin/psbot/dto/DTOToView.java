@@ -27,5 +27,5 @@ public class DTOToView {
     @NotEmpty(message = "Plz write style of the game")
     private String style;
 
-    private MultipartFile multipartFile;
+    private MultipartFile file;
 }
